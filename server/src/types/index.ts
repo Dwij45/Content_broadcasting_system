@@ -8,11 +8,13 @@ export interface User {
   role: UserRole;
   created_at: Date;
 }
+// (never expose password_hash in responses)
+export type SafeUser = Omit<User, 'password_hash'>;
 export interface JwtPayload {
   id: string;
-  email: string;
+  email?: string;
   role: UserRole;
-  name: string;
+  name?: string;
 }
 
 export interface AuthResponse {
@@ -23,4 +25,15 @@ export interface AuthResponse {
     email: string;
     role: UserRole;
   };
+}
+export interface AuthResult {
+  user: SafeUser;
+  token: string;
+}
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JwtPayload; // set by authenticate middleware
+    }
+  }
 }
