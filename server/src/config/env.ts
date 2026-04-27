@@ -1,0 +1,34 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+const required = (key: string): string => {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+  return value;
+};
+
+const optional = (key: string, fallback: string): string => {
+  return process.env[key] ?? fallback;
+};
+
+
+export const env = {
+  PORT: parseInt(optional('PORT', '3000'), 10),
+
+  DB: {
+    HOST:     optional('DB_HOST', 'localhost'),
+    PORT:     parseInt(optional('DB_PORT', '5432'), 10),
+    NAME:     optional('DB_NAME', 'cbs_db'),
+    USER:     optional('DB_USER', 'postgres'),
+    PASSWORD: optional('DB_PASSWORD', ''),
+  },
+
+  JWT: {
+    SECRET:     optional('JWT_SECRET', 'fallback_secret_change_me'),
+    EXPIRES_IN: optional('JWT_EXPIRES_IN', '7d'),
+  },
+
+  BCRYPT_SALT_ROUNDS: parseInt(optional('BCRYPT_SALT_ROUNDS', '10'), 10),
+};
