@@ -18,11 +18,11 @@ export const env = {
   PORT: parseInt(optional('PORT', '3000'), 10),
 
   DB: {
-    HOST:     optional('DB_HOST', 'localhost'),
-    PORT:     parseInt(optional('DB_PORT', '5432'), 10),
-    NAME:     optional('DB_NAME', 'cbs_db'),
-    USER:     optional('DB_USER', 'postgres'),
-    PASSWORD: optional('DB_PASSWORD', ''),
+    HOST:     process.env.DB_HOST     || process.env.PGHOST     || 'localhost',
+    PORT:     parseInt(process.env.DB_PORT || process.env.PGPORT || '5432', 10),
+    NAME:     process.env.DB_NAME     || process.env.PGDATABASE || 'cbs_db',
+    USER:     process.env.DB_USER     || process.env.PGUSER     || 'postgres',
+    PASSWORD: process.env.DB_PASSWORD || process.env.PGPASSWORD || '',
   },
 
   JWT: {
