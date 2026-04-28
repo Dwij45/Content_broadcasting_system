@@ -4,6 +4,7 @@ import contentRoutes from './modules/content/content.route.js'
 import approvalRoutes from './modules/approval/approval.route.js'
 import broadcastRoutes from './modules/scheduling/scheduling.route.js'
 import { setupSwagger } from './config/swagger.js'
+import rateLimit from 'express-rate-limit'
 import cors from 'cors'
 import path from 'path'
 import type { Request, Response } from 'express'
@@ -13,6 +14,16 @@ app.use(express.json())
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Global Rate Limiting: 100 requests per 15 minutes per IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100, 
+  message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' },
+  standardHeaders: true, 
+  legacyHeaders: false,
+});
+app.use(limiter);
 
 setupSwagger(app);
 
