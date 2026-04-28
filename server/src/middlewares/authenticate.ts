@@ -7,8 +7,8 @@ export const authenticate = (
   res: Response,
   next: NextFunction
 ): void => {
-  // JWT must come as: Authorization: Bearer <token>
-  const authHeader = req.headers.authorization || req.cookies['token']; // also check cookies for token (optional)
+//  Authorization: Bearer <token>
+  const authHeader = req.headers.authorization || req.cookies['token']; 
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({ message: 'Access token is required' });
