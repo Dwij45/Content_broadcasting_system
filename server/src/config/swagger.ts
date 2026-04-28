@@ -26,7 +26,7 @@ const options: swaggerJsdoc.Options = {
     ],
     servers: [
       {
-        url: 'https://content-broadcasting-system-8o9c.onrender.com',
+        url: 'https://broadcasting-backend-w66a.onrender.com',
         description: 'Production Server'
       },
       {
