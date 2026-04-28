@@ -1,0 +1,53 @@
+services:
+  - type: web
+    name: broadcasting-backend
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start"
+    envVars:
+      - key: PORT
+        value: 3000
+      # Database connection (Will connect to Postgres below)
+      - key: PGHOST
+        fromDatabase:
+          name: broadcasting-db
+          property: host
+      - key: PGUSER
+        fromDatabase:
+          name: broadcasting-db
+          property: user
+      - key: PGDATABASE
+        fromDatabase:
+          name: broadcasting-db
+          property: database
+      - key: PGPASSWORD
+        fromDatabase:
+          name: broadcasting-db
+          property: password
+      - key: PGPORT
+        fromDatabase:
+          name: broadcasting-db
+          property: port
+      # Secrets (You will enter these manually in the Render dashboard)
+      - key: JWT_SECRET
+        sync: false
+      - key: BCRYPT_SALT_ROUNDS
+        value: '10'
+      # AWS S3 Data
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_S3_BUCKET_NAME
+        sync: false
+
+databases:
+  - name: broadcasting-db
+    databaseName: broadcasting_db
+    user: admin
+    plan: free
+    region: frankfurt
