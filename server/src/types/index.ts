@@ -37,3 +37,31 @@ declare global {
     }
   }
 }
+
+export type ContentStatus = 'pending' | 'approved' | 'rejected';
+
+export interface Content {
+  id: string;
+  title: string;
+  description: string | null;
+  subject: string;
+  file_url: string;           
+  file_path: string;          
+  file_type: string;          
+  file_size: number;          
+  uploaded_by: string;        
+  status: ContentStatus;
+  rejection_reason: string | null;
+  approved_by: string | null; 
+  approved_at: Date | null;
+  start_time: Date | null;
+  end_time: Date | null;
+  rotation_duration: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface ContentWithUsers extends Content {
+  uploader_name: string;
+  approver_name: string | null;
+}
