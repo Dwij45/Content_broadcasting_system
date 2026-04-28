@@ -1,0 +1,54 @@
+==========================================
+BROADCASTING APP - ARCHITECTURE NOTES
+==========================================
+
+This document outlines the core architectural and system design decisions made to satisfy the requirements of the Content Broadcasting System.
+
+1. Folder Structure & Code Organization
+The application is structured using a modular, feature-based architecture under the \`src/\` directory to ensure high maintainability and segregation of concerns:
+- \`src/modules/\`: Contains independent business domains (\`auth\`, \`content\`, \`approval\`, \`scheduling\`). Each module encapsulates its own \`.route.ts\`, \`.controller.ts\`, \`.services.ts\`, and \`.schema.ts\` (Zod validation).
+- \`src/middlewares/\`: Centralized application-level middlewares (\`authenticate.ts\`, \`authorize.ts\`, \`upload.middleware.ts\`).
+- \`src/config/\`: Database initialization, environment variables, Swagger spec, and migration/seed scripts.
+- \`src/types/\`: Global TypeScript interfaces.
+
+2. Authentication & RBAC Flow
+- Mechanism: Stateless JSON Web Tokens (JWT).
+- Flow: Upon successful login, the server issues a JWT payload containing \`userId\` and \`role\`.
+- Role-Based Access Control (RBAC): The \`authorize(...roles)\` middleware intercepts protected routes. It verifies the decoded JWT role against the allowed roles for that route. 
+- Strict Separation: Teachers and Principals have distinct boundaries. Only teachers can upload to \`/api/content/upload\`; only principals can hit \`/api/approval/:id/approve\`.
+
+3. Database Design Decisions
+- Native PostgreSQL Driver: The project intentionally avoids bloated ORMs (like Sequelize/TypeORM) in favor of the highly efficient native \`pg\` library with connection pooling.
+- Security: All dynamic SQL variables use absolute parameterized queries (e.g., \`WHERE id = $1\`) ensuring total immunity from SQL injection.
+- Tables Used: 
+  - \`users\` (uuid, name, email, password_hash, role)
+  - \`content\` (uuid, title, subject, file_url, status, rotation_duration, start_time, end_time, etc.) tracking the full lifecycle of content constraints.
+
+4. Upload Handling Approach 
+- Direct Cloud Streaming: To avoid local I/O bottlenecks and disk bloat, the application utilizes \`multer-s3\`.
+- Flow: When a teacher uploads content (JPG, PNG, GIF), the buffer streams directly from the TCP connection to an AWS S3 bucket. The database only stores the lightweight S3 `file_url`, resolving scaling issues in a multi-node deployment.
+
+5. Approval Workflow Design
+- Status Lifecycle: \`uploaded\` (default) -> \`pending\` -> \`approved\` OR \`rejected\`.
+- Principal Action: The Principal queries pending lists using status filters. Upon rejection, the Zod schema enforces that a \`rejection_reason\` must be provided. Only \`approved\` statuses are flagged as eligible for public broadcast viewing.
+
+6. Subject-Based System Design
+- Tagging: All content is hard-bound to a specific \`subject\` (e.g., maths, science).
+- Separation: Subjects serve as partition keys during public broadcast fetches. This ensures that the Science broadcast is completely independent of the Maths broadcast loops.
+
+7. Scheduling / Rotation Logic 
+The most critical edge case revolves around rendering dynamic, rotating scheduled feeds *synchronously* without background corn-jobs polling DB state.
+- Eligibility Filter: A raw SQL query checks: \`status = 'approved'\` AND \`start_time <= NOW()\` AND \`end_time > NOW()\`.
+- Dynamic Math Cycle: Among eligible contents for a teacher+subject, their \`rotation_duration\` values are aggregated to find the "Total Cycle Time". 
+- Time-based Hash: Using modulo math against the Unix Time Epoch: \`elapsed_ms = (NOW - min_start_time) % total_cycle_ms\`.
+- Result: This algorithm mathematically determines precisely which clip is "Active" at any exact millisecond, meaning infinite parallel student requests hitting the API will all perfectly resolve the identical active slot without heavy lifting.
+
+8. Middleware Usage
+- \`authenticate\`: Parses Bearer token.
+- \`authorize\`: Enforces Principal vs Teacher barriers.
+- \`express-rate-limit\` (Bonus Feature): Blocks clients exceeding 100 requests per 15 minutes, preventing DDoS vectors and saving S3 read/write costs.
+
+9. Scalability Approach & Edge Cases
+- State Separation: By pushing file blobs to S3 and Auth tokens to stateless JWTs, the Node process is entirely stateless. We can horizontally spin up 100 Render Web Instances behind a load balancer safely.
+- No Content Edge Case: If a teacher lacks content, or content is expired, the API politely returns a structured payload \`{ active_content: null, message: 'No content available' }\` avoiding unhandled server crashes.
+- Pagination: Content listing queries strictly enforce SQL \`LIMIT\` and \`OFFSET\` parameters to cap DB memory overhead.
