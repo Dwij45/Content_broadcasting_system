@@ -2,12 +2,12 @@ import { z } from 'zod';
 
 export const uploadContentSchema = z.object({
   title: z
-    .string({ error: 'Title is required' })
+    .string({ required_error: 'Title is required' })
     .min(1, 'Title cannot be empty')
     .max(255, 'Title is too long'),
 
   subject: z
-    .string({ error: 'Subject is required' })
+    .string({ required_error: 'Subject is required' })
     .min(1, 'Subject cannot be empty')
     .max(100, 'Subject name is too long')
     .transform((val) => val.toLowerCase().trim()), 

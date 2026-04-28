@@ -73,7 +73,7 @@ export const uploadContent = async (
       input.description ?? null,
       input.subject,          // already lowercased by Zod schema
       fileUrl,
-      file.path,              // disk path for internal use
+      filePath,               // S3 key for internal use
       file.mimetype,          // image/jpeg etc
       file.size,              // bytes
       req.user?.id as string, // teacher's user id from JWT
