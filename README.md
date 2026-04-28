@@ -2,6 +2,8 @@
 
 A robust role-based broadcasting, moderation, and dynamic scheduling backend API built precisely to assignment specifications using Node.js, Express, and native PostgreSQL.
 
+🚀 **Live Deployment:** [https://content-broadcasting-system-8o9c.onrender.com/api-docs](https://content-broadcasting-system-8o9c.onrender.com/api-docs)
+
 ## Core Features Implemented
 * **Authentication & RBAC:** Complete JWT separation between \`teacher\` and \`principal\` roles.
 * **Content Upload System:** Direct streaming uploads of educational media via AWS S3.
@@ -54,8 +56,10 @@ npm run start
 \`\`\`
 
 ## Interactive Documentation (Swagger API Usage)
-To thoroughly test the APIs, start the server and interact natively with:
--> **[http://localhost:3000/api-docs](http://localhost:3000/api-docs)**
+To thoroughly test the APIs, interact natively with the deployed Swagger Documentation:
+-> **[https://content-broadcasting-system-8o9c.onrender.com/api-docs](https://content-broadcasting-system-8o9c.onrender.com/api-docs)**
+
+*(For local testing, you can hit [http://localhost:3000/api-docs](http://localhost:3000/api-docs))*
 
 This provides pre-configured payload samples for Auth, Uploads, Approvals, and Broadcast fetches without needing Postman.
 

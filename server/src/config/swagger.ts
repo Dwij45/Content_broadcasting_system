@@ -26,7 +26,12 @@ const options: swaggerJsdoc.Options = {
     ],
     servers: [
       {
+        url: 'https://content-broadcasting-system-8o9c.onrender.com',
+        description: 'Production Server'
+      },
+      {
         url: `http://localhost:${process.env.PORT || 3000}`,
+        description: 'Local Development Server'
       },
     ],
   },
